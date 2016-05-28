@@ -16,7 +16,7 @@ function _inherits(subClass, superClass) {
 
 var baseUrl = "img/";
 
-var loader = new PIXI.loaders.Loader(baseUrl).add("face", "spacecat.png").load(init);
+var loader = new PIXI.loaders.Loader(baseUrl).add("cat", "spacecat.png").load(init);
 
 var lastLoop = new Date;
 var loopCounter = 0;
@@ -40,7 +40,7 @@ var limit = 5000;
 
 var ease = Power0.easeNone;
 
-var faces = [];
+var cats = [];
 var isAdding = false;
 
 var view = document.querySelector("canvas");
@@ -144,7 +144,7 @@ var SpaceCat = (function(_PIXI$Sprite) {
 
 function init(loader, assets) {
 
-    texture = assets.face.texture;
+    texture = assets.cat.texture;
 
     var visible = true;
 
@@ -165,11 +165,9 @@ function init(loader, assets) {
 }
 
 //
-// CREATE FACES
+// CREATE CATS
 // ========================================================================
 function createCats(count) {
-
-    catsRendered += count;
 
     for (var i = 0; i < count; i++) {
 
@@ -178,10 +176,10 @@ function createCats(count) {
 
     function createCat() {
 
-        var face = new SpaceCat(texture);
+        var cat = new SpaceCat(texture);
 
-        faces.push(face);
-        container.addChild(face);
+        cats.push(cat);
+        container.addChild(cat);
         total++;
     }
 }
@@ -207,22 +205,35 @@ function render() {
     lastLoop = thisLoop;
 
     for (var i = 0; i < total; i++) {
-        faces[i].update();
+        cats[i].update();
     }
 
-    if(warmup && catsRendered > 120){
+    if(warmup && total > 120){
        warmup = false;
-       catsRendered = 0;
+       total = 0;
+       container.removeChildren();
+        for (var i = 0; i < total; i++) {
+            cats[i].destroy();
+
+        }
+        return;
     }
 
     if (fps > threshold) {
         renderer.render(stage);
         createCats(1);
-        info.innerHTML = Math.floor(fps) + ' FPS';
+        if(!warmup){
+            info.innerHTML = Math.floor(fps) + ' FPS';
+        }
     }
     else if(!warmup){
-        info.innerHTML = 'Benchmark finished, SCORE: ' + catsRendered +' cats';
+        info.innerHTML = 'Benchmark finished, SCORE: ' + total +' cats';
         threshold = 1000;
     }
 
+}
+
+function sleepFor( sleepDuration ){
+    var now = new Date().getTime();
+    while(new Date().getTime() < now + sleepDuration){ /* do nothing */ } 
 }
