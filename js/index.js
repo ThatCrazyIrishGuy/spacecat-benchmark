@@ -2,17 +2,31 @@
 
 function _classCallCheck(instance, Constructor) {
     if (!(instance instanceof Constructor)) {
-        throw new TypeError("Cannot call a class as a function"); } }
+        throw new TypeError("Cannot call a class as a function");
+    }
+}
 
 function _inherits(subClass, superClass) {
     if (typeof superClass !== "function" && superClass !== null) {
-        throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); }
+        throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);
+    }
     subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } });
-    if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+    if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass;
+}
 
 var baseUrl = "img/";
 
 var loader = new PIXI.loaders.Loader(baseUrl).add("face", "spacecat.png").load(init);
+
+var lastLoop = new Date;
+var loopCounter = 0;
+var loopLimit = 60;
+
+var info = document.getElementById("info");
+
+var threshold = 30;
+
+var catsRendered = 1;
 
 var minX = 0;
 var minY = 0;
@@ -143,23 +157,19 @@ function init(loader, assets) {
             TweenLite.to("#info", 1, { autoAlpha: 0 });
         }
     };
-
-    document.addEventListener("touchstart", toggle);
-    document.addEventListener("touchend", toggle);
-    document.addEventListener("mousedown", toggle);
-    document.addEventListener("mouseup", toggle);
-
     window.addEventListener("resize", resize);
     TweenLite.ticker.addEventListener("tick", render);
     TweenLite.set("main", { autoAlpha: 1 });
 
-    createCats(_.random(4, batch));
+    createCats(1);
 }
 
 //
 // CREATE FACES
 // ========================================================================
 function createCats(count) {
+
+    catsRendered += count;
 
     for (var i = 0; i < count; i++) {
 
@@ -192,13 +202,22 @@ function resize() {
 // ========================================================================
 function render() {
 
-    if (isAdding && total < limit) {
-        createCats(batch);
-    }
+    var thisLoop = new Date;
+    var fps = 1000 / (thisLoop - lastLoop);
+    lastLoop = thisLoop;
 
     for (var i = 0; i < total; i++) {
         faces[i].update();
     }
+    if (fps > threshold) {
+        renderer.render(stage);
+        createCats(1);
+        info.innerHTML = Math.floor(fps) + ' FPS';
+    } else {
+        if (catsRendered > 2) {
+            info.innerHTML = 'Benchmark finished, SCORE: ' + catsRendered +' cats';
+            threshold = 1000;
+        }
+    }
 
-    renderer.render(stage);
 }
