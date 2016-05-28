@@ -25,7 +25,7 @@ var loopLimit = 60;
 var info = document.getElementById("info");
 
 var threshold = 30;
-
+var warmup = true;
 var catsRendered = 1;
 
 var minX = 0;
@@ -209,15 +209,20 @@ function render() {
     for (var i = 0; i < total; i++) {
         faces[i].update();
     }
+
+    if(warmup && catsRendered > 120){
+       warmup = false;
+       catsRendered = 0;
+    }
+
     if (fps > threshold) {
         renderer.render(stage);
         createCats(1);
         info.innerHTML = Math.floor(fps) + ' FPS';
-    } else {
-        if (catsRendered > 2) {
-            info.innerHTML = 'Benchmark finished, SCORE: ' + catsRendered +' cats';
-            threshold = 1000;
-        }
+    }
+    else if(!warmup){
+        info.innerHTML = 'Benchmark finished, SCORE: ' + catsRendered +' cats';
+        threshold = 1000;
     }
 
 }
